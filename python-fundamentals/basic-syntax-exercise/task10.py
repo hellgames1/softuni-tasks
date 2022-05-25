@@ -1,8 +1,5 @@
 """"
-You will be given two strings.
-Transform the first string into the second one, letter by letter, starting from the first one.
-After each interaction, print the resulting string only if it is unique.
-Note: the strings will have the same length
+Task 10 - Mutate Strings
 """
 
 first = input()
