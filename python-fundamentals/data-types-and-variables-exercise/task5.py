@@ -1,0 +1,5 @@
+""""
+Task 5 - Print Part of the ASCII Table
+"""
+for i in range(int(input()), int(input()) + 1):
+    print(chr(i), end=" ")
