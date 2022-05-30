@@ -1,7 +1,7 @@
 import requests
 import sys#, os
 
-server_ip = "46.35.186.220"
+server_ip = "transferaeasy.000webhostapp.com"
 has_profile = requests.get(f"http://{server_ip}/index.php")
 errormsg = ""
 
