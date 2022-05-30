@@ -26,7 +26,7 @@ else:
     print(f"Добре дошъл, {usrname.text}!\nИмай впредвид, че чатът не поддържа кирилица и съобщения над 160 символа!\nНатисни Enter, за да продължиш...")
     input()
     while True:
-        _ = os.system('cls')
+        #_ = os.system('cls')
         chat = requests.get(f"http://{server_ip}/chat.txt")
         chat_printable = chat.text.replace("@@","\n")
         print(chat_printable)
