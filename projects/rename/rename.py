@@ -7,13 +7,13 @@ newdir.remove(os.path.basename(__file__))
 i = 0
 
 
-print("Добре дошъл в скрипта за промяна на имена на файлове.\nИзбери какви действия искаш да предприемеш:")
+print("Добре дошъл в скрипта за промяна на имена на файлове.\nСимволите @@ ще бъдат автоматично заменяни с индекса на файла, започващ от 1.\nИзбери какви действия искаш да предприемеш:")
 
 while True:
     i+=1
-    print(f"Действие номер {i}: \n1) замени текст с друг текст\n2) добави текст в началото на имената\n3) добави текст в края на имената\nИзбери: ", end="")
+    print(f"Действие номер {i}: \n1) замени текст с друг текст\n2) добави текст в началото на имената\n3) добави текст в края на имената\n4) замени целите имена с нещо\nИзбери: ", end="")
     command = input()
-    if command != "1" and command != "2" and command != "3":
+    if command != "1" and command != "2" and command != "3" and command != "4":
         i-=1
         print("Няма такава опция!")
         continue
@@ -24,19 +24,37 @@ while True:
             print("С какъв текст да го заменя? ", end="")
             changes_to = input()
             for j in range(len(newdir)):
-                newdir[j] = newdir[j].replace(changes_from, changes_to)
+                newdir[j] = newdir[j].replace(changes_from.replace("@@",str(j+1)), changes_to.replace("@@",str(j+1)))
         elif command == "2":
             print("Какъв текст да добавя в началото на имената? ", end="")
             changes_from = input()
             changes_to = "null"
             for j in range(len(newdir)):
-                newdir[j] = changes_from + newdir[j]
+                newdir[j] = changes_from.replace("@@",str(j+1)) + newdir[j]
         elif command == "3":
             print("Какъв текст да добавя в края на имената? ", end="")
             changes_from = input()
-            changes_to = "null"
+            print("Преди разширението ли да бъде? 1)да 2)не ", end="")
+            changes_to = input()
+
             for j in range(len(newdir)):
-                newdir[j] = newdir[j] + changes_from
+                if changes_to == "1":
+                    ext=newdir[j][newdir[j].rfind('.'):]
+                    newdir[j] = newdir[j][:newdir[j].rfind('.')]
+                else:
+                    ext=""
+                newdir[j] = newdir[j] + changes_from.replace("@@",str(j+1)) + ext
+        elif command == "4":
+            print("С какво да заменя целите имена? За нумерация може да използваш символите @@")
+            changes_from = input()
+            print("Да запазя ли разширенията? 1)да 2)не ", end="")
+            changes_to = input()
+            for j in range(len(newdir)):
+                if changes_to == "1":
+                    ext=newdir[j][newdir[j].rfind('.'):]
+                else:
+                    ext=""
+                newdir[j] = changes_from.replace("@@",str(j+1))+ext
         print("Добре! ", end="")
         while True:
             print("Сега?\n1) визуализирай промените до сега\n2) добави следващо действие\n3) готово! приложи промените и излез\nИзбери: ",end="")

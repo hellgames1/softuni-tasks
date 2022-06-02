@@ -1,7 +1,8 @@
 Batch rename program
 
-Basically it scans the folder that it's in, then allows you to rename each file by replacing certain strings, or inserting text
+Basically it scans the folder that it's in, then allows you to rename each file by replacing certain strings or the entire name, or inserting text
 either at the beginning or end of all names. You can do more advanced renaming by combining a few of these actions.
+The symbols @@ will automatically be replaced with the index of the file, starting with 1.
 
 The .exe file is just the python code packaged with the necessary libraries so anyone can run it.
 Keep in mind the exe file NEEDS to be named rename.exe and nothing else for the program to work,
@@ -14,8 +15,9 @@ The .en.py file is an English version of the program, since the original is in B
 Програма за преименуване на цяла папка с файлове наведнъж
 
 Накратко - сканира директорията, в която се намира, и позволява да преименуваш всички файлове там наведнъж,
-като заменяш определен текст с друг текст, или да вметваш текст в началото или в края на всички имена.
-Може и да правиш по-сложни операции като комбинираш тези трите.
+като заменяш определен текст с друг текст, целите имена с някакъв текст, или да вметваш текст в началото или в
+края на всички имена. Може и да правиш по-сложни операции като комбинираш тези трите.
+Символите @@ автоматично ще бъдат замествани с индекса на файла, започващ от 1.
 
 .exe файлът е просто Python кода пакетиран с нужните библиотеки за да може директно да се пусне от всеки.
 Имайте впредвид че .exe файлът ЗАДЪЛЖИТЕЛНО трябва да е именуван rename.exe, иначе няма да работи.
