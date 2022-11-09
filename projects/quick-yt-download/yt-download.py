@@ -4,17 +4,18 @@ Works only on Windows!
 Auto-fixes repeating links or links with extra arguments (playlist, start time, etc)
 To use the program
 1. Install the packages pywin32, pytube, requests and pygame
-2. Download and unpack ffmpeg.exe from https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
+2. Download the image and sound files and place them in a directory called "data"
+3. Download and unpack ffmpeg.exe from https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z
 * you only need ffmpeg.exe, place it in the same directory as the script
-3. Run the code
-4. Open Youtube and start copying the links to every song/track that you want to download
-5. When you copy a link, the video will appear in the program and you will hear a sound
+4. Run the code
+5. Open Youtube and start copying the links to every song/track that you want to download
+6. When you copy a link, the video will appear in the program and you will hear a sound
 * if the link is invalid or already in the list, you will hear a different sound and see an error message
-6. Press the Start button to start downloading and converting the songs to mp3
-7. You can keep adding songs while the program is working
-8. When you're finished, press the Exit button
+7. Press the Start button to start downloading and converting the songs to mp3
+8. You can keep adding songs while the program is working
+9. When you're finished, press the Exit button
 
-The songs will be found in the "converted" directory where the script is located
+The songs will be found in the "converted" directory
 """
 
 import win32clipboard, pytube.exceptions
