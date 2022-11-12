@@ -235,7 +235,7 @@ def draw_display():
     if thread_playlist.is_alive():
         pygame.draw.rect(screen, (128, 0, 0), rect_cancelparsebutton)
         screen.blit(my_font.render("Stop parsing", True, (255, 255, 255)), (width/2 - 74, height - 66))
-        blitRotate(screen, progress_icon[0], (width/2, height - 86), (20, 20) ,anim_angle[0])
+        blitRotate(screen, progress_icon[0], (width/2 - 20, height - 108), anim_angle[0])
 
     if message_timer:
         message_render = my_font.render(message_text, True, (255,255,255,0.5))
