@@ -26,11 +26,13 @@ from pytube import YouTube, Playlist
 import requests
 import pygame
 
-from os import system, getcwd, path, makedirs, listdir
+from re import findall
+from os import getcwd, path, makedirs, listdir
 from time import sleep
 from sys import exit
 from io import BytesIO
 from shutil import rmtree
+import subprocess
 import threading
 
 def pre_exit():
@@ -73,9 +75,7 @@ def display_error(text):
 
 try:
     label = pygame.image.load(data_directory + "label.png")
-    trash = pygame.image.load(data_directory + "trash.png")
-    progress_icon = [pygame.image.load(data_directory + "progress_1.png"), pygame.image.load(data_directory + "progress_2.png"), pygame.image.load(data_directory + "progress_3.png"), pygame.image.load(data_directory + "progress_4.png"), pygame.image.load(data_directory + "progress_5.png")]
-    info_icon = pygame.image.load(data_directory + "info_icon.png")
+    sprites = pygame.image.load(data_directory + "sprites.png")
     positive_sound = pygame.mixer.Sound(data_directory + "positive.wav")
     negative_sound = pygame.mixer.Sound(data_directory + "negative.wav")
     delete_sound = pygame.mixer.Sound(data_directory + "delete.wav")
@@ -85,6 +85,17 @@ except FileNotFoundError as error:
 
 if not path.isfile("ffmpeg.exe"):
     display_error("Error: File 'ffmpeg.exe' was not found in the program directory!")
+
+trash = pygame.Surface((40,40))
+trash.blit(sprites,(0,0))
+info_icon = pygame.Surface((40,40))
+info_icon.blit(sprites,(-40,0))
+progress_icon = []
+for i in range(6):
+    progress_icon.append(pygame.Surface((40,40)))
+    progress_icon[i].blit(sprites,(-80 - (i * 40), 0))
+
+
 
 pygame.display.set_icon(icon)
 pygame.mixer.Sound.set_volume(positive_sound,0.4)
@@ -96,6 +107,18 @@ rect_cancelparsebutton = pygame.Rect(width / 2 - 80, 600 - 68, 160, 32)
 scrollbar = pygame.Rect(0,0,1,1)
 temp_thumbnail = pygame.Surface((64,36))
 temp_thumbnail.fill((0,0,0))
+
+def get_progress_conv(size):
+    try:
+        with open("progress-log.txt", "r") as f:
+            txt = f.read().replace("\n", "nlln")
+        results = ['0']
+        results.extend(findall(r"(?<=nllnout_time_ms=)(\d+)", txt))
+        #print(results)
+        percents = int(int(results[len(results) - 1]) // 1000000 / size * 100)
+        return percents
+    except:
+        return 0
 
 def clip(default):
     try:
@@ -112,18 +135,26 @@ def clip(default):
         return default
 
 
-def blitRotate(surf, image, pos, originPos, angle):
-    image_rect = image.get_rect(topleft=(pos[0] - originPos[0], pos[1] - originPos[1]))
-    offset_center_to_pivot = pygame.math.Vector2(pos) - image_rect.center
+def blitRotate(surf, image, pos, angle, percent=100):
+    if percent >= 100:
+        percent = 100
+    else:
+        percent *= 0.7
+        percent += 15
+    image_rect = image.get_rect()
+    offset_center_to_pivot = pygame.math.Vector2(20) - image_rect.center
 
     rotated_offset = offset_center_to_pivot.rotate(-angle)
 
-    rotated_image_center = (pos[0] - rotated_offset.x, pos[1] - rotated_offset.y)
+    rotated_image_center = (20 - rotated_offset.x, 20 - rotated_offset.y)
 
     rotated_image = pygame.transform.rotate(image, angle)
     rotated_image_rect = rotated_image.get_rect(center=rotated_image_center)
+    cropped = pygame.Surface((40 * (percent / 100),40))
 
-    surf.blit(rotated_image, rotated_image_rect)
+    cropped.blit(rotated_image, rotated_image_rect)
+
+    surf.blit(cropped, pos)
 
 def draw_display():
     global anim_angle
@@ -161,15 +192,16 @@ def draw_display():
 
             pygame.draw.rect(screen,(0,0,0),(width - 40 - scroller_offset, 40 * index + scrolled, 40, 40))
             if item.progress == 1:
-                blitRotate(screen,progress_icon[0],(width - 20 - scroller_offset, 40 * index + scrolled + 20), (20,20), anim_angle[0])
+                blitRotate(screen,progress_icon[0],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[0])
             elif item.progress == 2:
-                blitRotate(screen,progress_icon[1],(width - 20 - scroller_offset, 40 * index + scrolled + 20), (20,20), 0)
+                blitRotate(screen,progress_icon[1],(width - 40 - scroller_offset, 40 * index + scrolled), 0)
             elif item.progress == 3:
-                blitRotate(screen,progress_icon[2],(width - 20 - scroller_offset, 40 * index + scrolled + 20), (20,20), anim_angle[1])
+                blitRotate(screen,progress_icon[5],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[1])
+                blitRotate(screen,progress_icon[2],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[1], get_progress_conv(item.length))
             elif item.progress == 4:
-                blitRotate(screen,progress_icon[3],(width - 20 - scroller_offset, 40 * index + scrolled + 20), (20,20), 0)
+                blitRotate(screen,progress_icon[3],(width - 40 - scroller_offset, 40 * index + scrolled), 0)
             elif item.progress == 5:
-                blitRotate(screen,progress_icon[4],(width - 20 - scroller_offset, 40 * index + scrolled + 20), (20,20), 0)
+                blitRotate(screen,progress_icon[4],(width - 40 - scroller_offset, 40 * index + scrolled), 0)
 
             if item.info:
                 screen.blit(info_icon, (width - 80 - scroller_offset, 40 * index + scrolled))
@@ -184,6 +216,7 @@ def draw_display():
             info_w, info_h = info_message.get_size()
             pygame.draw.rect(screen, (255, 255, 255),(pygame.mouse.get_pos()[0] - info_w, pygame.mouse.get_pos()[1], info_w, info_h))
             screen.blit(info_message,(pygame.mouse.get_pos()[0] - info_w, pygame.mouse.get_pos()[1]))
+
 
 
     pygame.draw.rect(screen, (0, 0, 0), (0, height - 32, width, 32))
@@ -230,11 +263,12 @@ thread_thumbs = threading.Thread(target=print)
 
 class Tvid:
     def __init__(self):
-        self.progress = 5
+        self.progress = 3
         self.info = "Video is age restricted!"
         self.valid = True
         self.title = "This is a test video"
         self.thumbnail = temp_thumbnail
+        self.length = 2770
         self.verbose_time = "test"
     def run(self,to):
         pass
@@ -312,8 +346,8 @@ class Video:
                     self.progress = 2
     def convert(self):
         self.progress = 3
-        system('ffmpeg.exe -loglevel fatal -y -i "raw\\' + self.file_name + '" -c:a libmp3lame -b:a 128k -ac 2 -ar 44100 "converted\\' + self.file_name[:-4] + '.mp3"')
-        system('del "raw\\' + self.file_name + '"')
+        subprocess.run('ffmpeg.exe -loglevel fatal -progress progress-log.txt -y -i "raw\\' + self.file_name + '" -c:a libmp3lame -b:a 128k -ac 2 -ar 44100 "converted\\' + self.file_name[:-4] + '.mp3"', shell=True)
+        subprocess.run('del "raw\\' + self.file_name + '"', shell=True)
         self.progress = 4
 
     def run(self,which):
@@ -428,7 +462,7 @@ while True:
             if event.button == 1:
                 if rect_cancelbutton.collidepoint(event.pos):
                     if len(listdir("converted")) > 0:
-                        system(f'explorer "{getcwd()}\\converted"')
+                        subprocess.run(f'explorer "{getcwd()}\\converted"', shell=True)
                     pre_exit()
                 elif rect_startbutton.collidepoint(event.pos) and to_download:
                     phase = 1 - phase
