@@ -161,6 +161,7 @@ def draw_display():
     global scroller_offset
     global anim_helper
     global scrollbar
+    global progress_conv, progress_conv_waiter
     if anim_helper == 1:
         if anim_angle[0] <= 30:
             anim_angle[0] = 360
@@ -197,7 +198,9 @@ def draw_display():
                 blitRotate(screen,progress_icon[1],(width - 40 - scroller_offset, 40 * index + scrolled), 0)
             elif item.progress == 3:
                 blitRotate(screen,progress_icon[5],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[1])
-                blitRotate(screen,progress_icon[2],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[1], get_progress_conv(item.length))
+                if progress_conv_waiter == 0:
+                    progress_conv = get_progress_conv(item.length)
+                blitRotate(screen,progress_icon[2],(width - 40 - scroller_offset, 40 * index + scrolled), anim_angle[1], progress_conv)
             elif item.progress == 4:
                 blitRotate(screen,progress_icon[3],(width - 40 - scroller_offset, 40 * index + scrolled), 0)
             elif item.progress == 5:
@@ -345,7 +348,10 @@ class Video:
                     self.audio_stream.download("raw\\")
                     self.progress = 2
     def convert(self):
+        global progress_conv_waiter, progress_conv
         self.progress = 3
+        progress_conv_waiter = 1
+        progress_conv = 0
         subprocess.run('ffmpeg.exe -loglevel fatal -progress progress-log.txt -y -i "raw\\' + self.file_name + '" -c:a libmp3lame -b:a 128k -ac 2 -ar 44100 "converted\\' + self.file_name[:-4] + '.mp3"', shell=True)
         subprocess.run('del "raw\\' + self.file_name + '"', shell=True)
         self.progress = 4
@@ -411,6 +417,8 @@ anim_helper = 0
 thread_playlist_terminate = False
 scrolling_mouse = False
 scrolling_mouse_offset = (0,0)
+progress_conv = 0
+progress_conv_waiter = 0
 
 win32clipboard.OpenClipboard()
 try:
@@ -559,5 +567,10 @@ while True:
 
     if message_timer > 0:
         message_timer -= 1
+
+    if progress_conv_waiter < 7:
+        progress_conv_waiter += 1
+    else:
+        progress_conv_waiter = 0
 
     sleep(0.05)
